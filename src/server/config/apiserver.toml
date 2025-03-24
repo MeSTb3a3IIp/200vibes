@@ -1,0 +1,4 @@
+bind_addr = ":8080"
+log_level = "debug"
+database_url = "host=localhost dbname=two_hundred_vibes sslmode=disable user=postgres password=2205"
+session_key = "14295098akb97f9aa023451048395kjaw8g7h7z78E89w9qioII990zo54p9Eo9s94342knJIOFJOhweur3y78rya8yr86t8tg78t6gurYR782647gdU67T8RE673TG"
