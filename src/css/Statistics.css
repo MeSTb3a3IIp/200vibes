@@ -1,0 +1,111 @@
+.task-statistics {
+    position: relative;
+    top: 0%;
+    left: 5%;
+    width: 90%;
+    height: 100vh;
+    overflow: scroll;
+    scrollbar-width: none;
+}
+.task-statistics > h2 {
+    position: relative;
+    color: #555;
+    width: 100%;
+}
+.statistics-container {
+    position: relative;
+    color: #444;
+    width: 100%;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+}
+.statistics-item > p {
+    position: relative;
+    font-size: 2.2ex;
+    color: #444;
+    width: 100%;
+}
+.statistics-item {
+
+}
+.statistics-graphic {
+    position: relative;
+    background-color: #fff;
+    border: 1px solid;
+    border-color: #A8D0E6;
+    height: 25vh;
+    width: calc(100% - 2px);
+}
+.comments-container{
+    position: relative;
+    height: 100vh;
+}
+.comments-info {
+    position: relative;
+}
+.input-comment-container{
+    position: relative;
+    min-height: 10%;
+    border-radius: 20px;
+    border: solid 1px #ddd;
+    background-color: #f6f6f6;
+}
+.input-comment {
+    position: relative;
+    min-height: 5vh;
+    height: auto;  
+    width: calc(100% - 40px);
+    border: none;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    padding: 20px;
+    background-color: #f6f6f6;
+    resize: none;
+}
+.input-comment:focus {
+    outline: none;         /* убираем стандартное выделение */
+    border: none; /* поддерживаем постоянный стиль границы */
+  }
+.input-comment:active {
+    border:none;
+}
+.buttons-container {
+    position: relative;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+    height: 5vh;
+}
+.button-item {
+    position: relative;
+    border-radius: 20px;
+    background-color:#20AAD8;
+    border: 0px;
+    margin: 10px;
+    font-size: 1.2em;
+    color: #eee;
+}
+.button-item:last-child {
+    position: absolute;
+    right: 0;
+}
+.button-item:hover {
+    background-color: #A8D0E6;
+    transition: background-color 0.3s;
+}
+
+.comments {
+    position: relative;
+    top: 5%;
+}
+
+.comment {
+    position: relative;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    color: #444;
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+}
+.comment:last-child {
+    border-bottom: none;
+}

@@ -1,0 +1,126 @@
+/* ============== Страница решения задач (TaskSolutions) ============== */
+.main-container {
+    position: relative;
+    left: 5%;
+    height: 100vh;
+    width: 95%;
+    display: flex;
+    z-index: 0;
+}
+
+.tasks-container {
+    position: relative;
+    width: 70%;
+    height: 100vh;
+    overflow: visible;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    background-color: #ffffff;
+    z-index: 2;
+  }
+  
+  .tasks-container h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #333;
+  }
+  
+  /* Список задач */
+  .tasks-list {
+    position: relative;
+    top: 15%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Каждый блок задачи */
+  .task-item {
+    background-color: #ffffff;
+    padding: 10px;
+    color: #444;
+    border-bottom: 1px solid #eee;
+    letter-spacing: 1px;
+  }
+  .task-item:last-child {
+    border-bottom: none;
+  }
+  .task-item:nth-child(even) {
+    background-color: #eee;
+    border-radius: 9px;
+  }
+  /* Контейнер заголовка для горизонтального расположения */
+  .task-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  /* Заголовок задачи */
+  .task-title {
+    margin: 0;
+    font-size: 1.0em;
+    color: #333333;
+  }
+  
+  /* Стилизация ссылки внутри заголовка */
+  .task-item a {
+    text-decoration: none;
+    color: inherit;
+  }
+  
+  
+  /* Индикатор уровня сложности */
+  .task-difficulty {
+    font-weight: bold;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+  }
+  
+  /* Стили для разных уровней сложности */
+  .task-difficulty.hard {
+    background-color: #0c4a7eBB; /* красный для сложных задач */
+  }
+  
+  .task-difficulty.medium {
+    background-color: #166cbdBB; /* оранжевый для средних */
+  }
+  
+  .task-difficulty.easy {
+    background-color: #1f8dc0BB; /* зелёный для лёгких */
+  }
+
+  .tags-container {
+    height: 70vh;
+    position: relative;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-top: 20px;
+    left: 3%;
+    border-radius: 20px;
+    background-color: #A8D0E6;
+    color: #fff;
+    width: calc(25% - 50px);
+    border-left: 1px solid #Eee;
+  }
+
+  .tags-container > p {
+    letter-spacing: 2px;
+    color: #444;
+    font-size: 2.0em;
+    padding: none;
+    margin: none;
+  }
+  .tags {
+    position: relative;
+  }
+  .tag {
+    position: relative;
+    display: inline-block;
+    padding: 10px;
+    margin: 5px;
+    background-color: #88B0C6;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }

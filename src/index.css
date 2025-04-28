@@ -1,13 +1,287 @@
+/* ============== Global Styles ============== */
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  font-family: 'Helvetica', 'Arial', sans-serif;
+  background-color: #fff;
+  color: #000;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.container {
+  position: fixed;
+  top:5%;
+  width: 100%;
+  height: 95%;
+  z-index: 0;
+  
+}
+
+
+/* ============== Страница авторизации/регистрации (Auth) ============== */
+.auth {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+.auth-container {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 20px 30px;
+  width: 350px;
+}
+
+.form-toggle {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 15px;
+}
+
+.form-toggle button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background-color: #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.form-toggle button.active,
+.form-toggle button:hover {
+  background-color: #2077A8;
+  color: #fff;
+  font-weight: bold;
+}
+
+.auth-container form input,
+.auth-container form button {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.auth-container form button {
+  background-color: #2077A8;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.auth-container form button:hover {
+  background-color: #0056b3;
+}
+
+/*TASK DETAIL*/
+.task-detail {
+  padding: 20px;
+  background-color: #ffffff;
+}
+
+.task-detail h2 {
+  font-size: 2em;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.task-detail p {
+  font-size: 1em;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.code-form {
+  margin-top: 20px;
+}
+
+/* Обертка для скроллинга всего редактора вместе с номерами строк */
+.editor-scroll-container {
+  width: 640px;        /* Общая ширина: 40px для номеров + 600px для редактора */
+  height: 300px;       /* Фиксированная высота редактора */
+  overflow: auto;      /* Единственный скролл для всего блока */
+  border: 1px solid #ccc;
+}
+
+/* Контейнер для лайн намберс и редактора, без собственного overflow */
+.editor-container {
+  display: flex;
+  height: 100%;
+}
+
+/* Блок для нумерации строк */
+.line-numbers {
+  width: 40px;
+  background-color: #f0f0f0; /* серый фон для всего столбца */
+  color: #888;
+  padding: 5px;
+  text-align: right;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.3em;
+  height: 100%;          /* растягиваем на всю высоту родительского контейнера */
+  overflow-y: hidden;    /* отключаем отдельный вертикальный скроллинг */
+}
+
+/* Если требуется для некоторых браузеров скрыть нативный скроллбар */
+.line-numbers::-webkit-scrollbar {
+  display: none;
+}
+
+/* Отдельная строка нумерации */
+.line-number {
+  height: 1.3em;
+}
+
+/* Поле редактора кода */
+.code-editor {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 5px;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.3em;
+  resize: none;
+  overflow-y: hidden;
+  /* Не задаем overflow здесь, оно будет у контейнера */
+}
+
+/* Стилизация кнопки Submit */
+.submit-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 1em;
+  color: #fff;
+  background-color: #2077A8;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+
+
+/* ============== Страница создания задачи (TaskCreation) ============== */
+.task-creation h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.task-creation form {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-creation form label {
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.task-creation form input,
+.task-creation form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  font-size: 1em;
+}
+
+/* Группировка тестовых примеров */
+.task-creation form .test-case {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.task-creation form .test-case input {
+  flex: 1;
+}
+
+.task-creation form button {
+  background-color: #007BFF;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.task-creation form button:hover {
+  background-color: #0056b3;
+}
+
+/* ============== Страница профиля (Profile) ============== */
+.profile-page h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.profile-page p {
+  margin-bottom: 10px;
+}
+
+.profile-page ul {
+  list-style: none;
+  padding: 0;
+}
+
+.profile-page ul li {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 10px;
+  margin-bottom: 5px;
+}
+
+.profile-page button {
+  background-color: #007BFF;
+  color: #fff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.profile-page button:hover {
+  background-color: #0056b3;
+}
+
+.profile-page input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin-bottom: 10px;
+}
+
+/* ============== Страница FAQ ============== */
+.faq-page h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.faq-item {
+  border-bottom: 1px solid #ddd;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}
+
+.faq-item h3 {
+  font-size: 1.2em;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.faq-item p {
+  margin: 0;
 }

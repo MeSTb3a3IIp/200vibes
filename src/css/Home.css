@@ -1,0 +1,148 @@
+.main {
+    position: relative;
+    display: flex;
+    width: 100%;
+    background-color: #ffffff;
+    z-index: 0;
+  }
+.main h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.news-list {
+    position: relative;
+    padding: 20px;
+    width: 70%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    overflow-y: scroll;
+    scrollbar-width: none;
+    z-index: 1;
+}
+  
+
+.news-item {
+    background-color: #ffffff; 
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.news-item:last-child {
+    border-bottom: none;
+}
+
+.news-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+  
+.news-title {
+    margin: 0;
+    font-size: 1.2em;
+    color: #555;
+}
+  
+
+.news-difficulty {
+    font-weight: bold;
+    color: #f7f7f7;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 0.8em;
+}
+  
+  
+.news-difficulty.hard {
+    background-color: #0c4a7eBB; /* красный для сложных задач */
+}
+  
+.news-difficulty.medium {
+    background-color: #166cbdBB; /* оранжевый для средних */
+}
+  
+.news-difficulty.easy {
+    background-color: #1f8dc0BB; /* зелёный для лёгких */
+}
+  
+
+.news-meta {
+    font-size: 0.8em;
+    color: #a8a8a8;
+    margin: 4px 0 12px 0;
+}
+  
+ 
+.news-description {
+    font-size: 0.9em;
+    color: #555;
+    line-height: 1.5;
+    width: 90%;
+}
+.help-list {
+    position: relative;
+    overflow: hidden;
+    margin: 20px;
+    padding: 20px;
+    width: 25%;
+    border-left: 1px solid #eee;
+}
+.help-item {
+    
+    position: relative;
+    height: 20vh;
+    padding: 15px;
+    margin-bottom: 10px;
+    width: calc(25vw - 30px);
+    letter-spacing: 1px;
+    border-radius: 10px;
+    border: 2px solid #eee;
+
+    background-image: url('./../images/HelpForCloudCoin.png'); /* Указываем путь к изображению */
+    background-size: cover; /* Изображение масштабируется пропорционально, чтобы покрыть весь блок */
+    background-position: center; /* Центрируем изображение */
+    background-repeat: no-repeat; /* Отключаем повтор */
+}
+.help-title {
+    position: relative;
+    color: #555;
+    font-size: 1.6em;
+    text-align: center;
+    letter-spacing: 3px;
+    padding: 0 0 25px 0;
+}
+.help-description {
+    position: relative;
+    margin: -10px;
+    padding: 20px;
+    color: #fff;
+    font-size: 1.1em;
+    letter-spacing: 1px;
+}
+.nav {
+    text-decoration: none;
+}
+.help-button {
+    position: relative;
+    display: block;
+    background-color: #eeeeee;
+    border: none;
+    height: 3vh;
+    width: 8vw;
+    margin: 0 auto;
+    color: #555;
+    border-radius: 15px;
+    letter-spacing: 1px;
+    transition: background-color 0.6s;
+
+}
+
+.help-button:hover {
+    background-color: #A8D0E6;
+    border: 2px solid #eee;
+    color: #fff;
+}
