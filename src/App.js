@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Home from './pages/Home';
 import Auth from './pages/Auth';
 import TaskSolutions from './pages/TaskSolutions';
+import TaskSolutionsTest from './pages/TaskSolutionsTest';
 import TaskDetail from './pages/TaskDetail';
 import Statistics from './pages/Statistics';
 import TaskCreation from './pages/TaskCreation';
@@ -17,22 +18,24 @@ function AppContent() {
   const hideHeaderRoutes = ['/auth'];
   const shouldHideHeader = hideHeaderRoutes.includes(location.pathname);
 
+  const content = (
+    <Routes>
+            <Route path="/" element={<Navigate to="/auth" replace />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/tasks" element={<TaskSolutions />} />
+            <Route path="/tasks/:id" element={<TaskDetail />} />
+            <Route path="/tasks/:id/statistics" element={<Statistics />} />
+            <Route path="/create-task" element={<TaskCreation />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/faq" element={<FAQ />} />
+            <Route path="/test-tasks" element={<TaskSolutionsTest />} />
+    </Routes>
+  )
   return (
     <>
-      {!shouldHideHeader && <Header />}
-      <div className="container">
-        <Routes>
-          <Route path="/" element={<Navigate to="/auth" replace />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/tasks" element={<TaskSolutions />} />
-          <Route path="/tasks/:id" element={<TaskDetail />} />
-          <Route path="/tasks/:id/statistics" element={<Statistics />} />
-          <Route path="/create-task" element={<TaskCreation />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/faq" element={<FAQ />} />
-        </Routes>
-      </div>
+        {!shouldHideHeader && <Header />}
+        {shouldHideHeader ? content : <div className="container">{content}</div>}
     </>
   );
 }

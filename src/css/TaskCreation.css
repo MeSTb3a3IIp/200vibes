@@ -1,0 +1,98 @@
+/* ============== Страница создания задачи (TaskCreation) ============== */
+.task-creation {
+    position: relative;
+  background-color: #f8f8f8;
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+  top: -2%;
+  overflow-y: auto !important;
+  scrollbar-width: none;
+}
+.input {
+    position: relative;
+    background-color: #fff;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+
+}
+
+.delete-testCase {
+    padding: 0 1px 1px 0;
+    color: #fff;
+    border: 1px solid #ccc;
+    background-color: #2077A8;
+    border-radius: 100%;
+    margin-top: 7px;
+    height: 25px;
+    width: 25px;
+}
+.delete-testCase:hover {
+    background-color: #0056b3;
+}
+
+.add-testCase {
+    margin-top:5px;
+    position: relative;
+    left: 97.8%;
+    width: 25px;
+    background-color: #2077A8;
+    border: 1px solid #ccc;
+    color: #fff;
+    border-radius: 100%;
+    height: 25px;
+
+}
+.add-testCase:hover {
+    background-color: #0056b3;
+}
+
+.submit {
+    position: relative;
+    left: 35vw;
+    width: 20vw;
+    background-color: #2077A8;
+    border: 1px solid #ccc;
+    color: #fff;
+    border-radius: 10px;
+}
+.submit:hover {
+    background-color: #0056b3;
+}
+.task-creation h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.task-creation form {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-creation form label {
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.task-creation form input,
+.task-creation form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin-bottom: 10px;
+  font-size: 1em;
+}
+
+/* Группировка тестовых примеров */
+.task-creation form .test-case {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.task-creation form .test-case input {
+  flex: 1;
+}
+

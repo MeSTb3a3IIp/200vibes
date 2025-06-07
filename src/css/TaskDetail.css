@@ -1,0 +1,110 @@
+/*TASK DETAIL*/
+.task-detail {
+    height: auto;
+    min-height: 100%;
+  padding: 10px 40px;
+  background-color: #f8f8f8;
+}
+
+.task-detail h2 {
+  font-size: 2em;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.task-detail p {
+  font-size: 1em;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.code-form {
+  margin-top: 20px;
+}
+
+
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+/* Обертка для скроллинга всего редактора вместе с номерами строк */
+.editor-scroll-container {
+    
+  width: 640px;        /* Общая ширина: 40px для номеров + 600px для редактора */
+  height: 300px;       /* Фиксированная высота редактора */
+  display: grid;
+  grid-template-columns: auto 1fr;
+  overflow-y: auto;
+  scrollbar-width: none; 
+  overflow-x: hidden;
+  border: 1px solid #ccc;
+}
+
+/* Контейнер для лайн намберс и редактора, без собственного overflow */
+.editor-container {
+  display: flex;
+  height: 100%;
+}
+
+/* Блок для нумерации строк */
+.line-numbers {
+  width: 40px;
+  background-color: #f0f0f0;
+  color: #888;
+  padding: 5px;
+  text-align: right;
+  font-family: monospace;
+  font-size: 14px;
+  /* Используем фиксированный line-height для точного вычисления высоты */
+  line-height: 18px;
+  overflow-y: hidden;
+}
+
+/* Если требуется для некоторых браузеров скрыть нативный скроллбар */
+.line-numbers::-webkit-scrollbar {
+  display: none;
+}
+
+/* Отдельная строка нумерации */
+.line-number {
+  height: 18px; /* Фиксированная высота, совпадающая с line-height */
+}
+
+/* Поле редактора кода */
+.code-editor {
+  width: 600px;
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 5px;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 18px; /* Тоже фиксированное значение */
+  resize: none;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  /* overflow не указан, т.к. прокрутка на уровне общего контейнера */
+}
+
+/* Стилизация кнопки Submit */
+.submit-button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  font-size: 1em;
+  color: #fff;
+  background-color: #2077A8;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+.desc {
+    background-color: #fff;
+    width: 100%;
+    height: auto;
+    padding: 20px;
+    border-radius: 25px;
+}
+.submit-button:hover {
+  background-color: #0056b3;
+}

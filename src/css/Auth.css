@@ -1,0 +1,217 @@
+/* ============== Страница авторизации/регистрации (Auth) ============== */
+.auth {
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    background: #c9dbe9;
+    background: -webkit-linear-gradient(top, #c9dbe9 0%, #fff 100%);
+    background: linear-gradient(to bottom, #c9dbe9 0%, #fff 100%);
+    background: -moz-linear-gradient(top, #c9dbe9 0%, #fff 100%);
+    overflow: hidden;
+  }
+  .logo-container {
+    position: absolute;
+    left:25%;
+    width: 50%;
+    height: 20%;
+    top: 0;
+    background-color: var(--logo-container-background, #F8F8F8);
+    transform: translateY(-20vh);
+    border-bottom-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+    animation: logo-container 3s ease-in-out forwards;
+    animation-delay: var(--logo-container-delay, 0.3s);
+  }
+  
+  @keyframes logo-container {
+      70% {
+        transform: translateY(-3vh);
+      }
+      100% {
+        transform: translateY(-6vh);
+      }
+
+  }
+  .letter-container {
+    position: relative;
+    left: 41vw;
+    display: flex;
+    z-index:10;
+    top: 0%;
+  }
+  .letter {
+    margin: 0 0.3vw;
+    
+    align-items: center;
+    transform: translateY(-5vh);
+    color: #444;
+    font-size: 40px;
+    animation: letter 2.5s ease-in-out forwards;
+  }
+  .letter:nth-child(1) { animation-delay: 0.5s; }
+  .letter:nth-child(2) { animation-delay: 0.8s; }
+  .letter:nth-child(3) { animation-delay: 1.1s; }
+  .letter:nth-child(4) { animation-delay: 1.4s; }
+  .letter:nth-child(5) { animation-delay: 1.7s; }
+  .letter:nth-child(6) { animation-delay: 2.0s; }
+  .letter:nth-child(7) { animation-delay: 2.3s; }
+  .letter:nth-child(8) { animation-delay: 2.6s; }
+  
+  
+  @keyframes letter {
+    75% {
+      transform: translateY(5vh);
+    }
+    100% {
+      transform: translateY(4vh);
+    }
+  }
+  .shadow-left-info,
+  .left-info {
+    position: absolute;
+    background-color: var(--background, #F8F8F8);
+    left: 5vw;
+    transform: translateY(100vh);
+    height: 55vh;
+    width: 20vw;
+    border-radius: 30px;
+    animation: info-anim 3s var(--delay, 0s) ease-out forwards, info-anim-inf 3s var(--delay, 0s) infinite;
+    padding: 30px;
+
+  }
+  .shadow-right-info,
+  .right-info {
+    position: absolute;
+    background-color: var(--background, #F8F8F8);
+    left: 75vw;
+    transform: translateY(100vh);
+    height: 55vh;
+    width: 20vw;
+    border-radius: 30px;
+    animation: info-anim 3s var(--delay, 0s) ease-out forwards, info-anim-inf 3s var(--delay, 0s) infinite;
+
+    
+    padding: 30px;
+  }
+
+  @keyframes info-anim {
+    70% {
+      transform: translateY(23vh);
+    }
+    100% {
+      transform: translateY(25vh);
+    }
+  }
+  @keyframes info-anim-inf {
+    50% {
+      transform: translateY(24vh);
+    }
+    100% {
+      transform: translateY(25vh);
+    }
+  }
+
+
+  .left-info,
+  .right-info {
+    
+    letter-spacing: 1px;
+    color: #444;
+    font-size: 1.2em;
+    line-height: 1.5;
+  }
+
+
+
+
+
+  .auth-container {
+    position: relative;
+    transform: translate(-50%, -50%);
+    top:50vh;
+    left:50vw;
+    height: 30vh;
+    border-radius: 50%;
+    padding: 20px 30px;
+    width: 20vw;
+    background-color: #F8F8F8;
+    z-index: 2;
+
+    justify-content: center;
+    align-items: center;
+  }
+  .title {
+    text-align: center;
+    margin: 0 auto 10px auto;
+    color: #444;
+    font-size: 1.8em;
+    letter-spacing: 2px;
+  }
+  .sign {
+    display: block;
+    margin: 0 auto;
+    background-color: #F8F8F8;
+    color: #666;
+    border: none;
+    font-size: 1.2em;
+    letter-spacing: 2px;
+  }
+
+  
+  .auth-container form input {
+    width: calc(100%);
+    margin: 10px 0px;
+    padding: 10px;
+    border: 0px solid #F8F8F8;
+    background-color: #A8D0E6;
+    border-radius: 20px;
+  }
+  .auth-container form button {
+    width: calc(100%);
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #2077A8;
+    color: #F8F8F8;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .auth-container form button:hover {
+    background-color: #0056b3;
+  }
+  .point,
+  .point.reverse {
+    position: fixed;
+    left: 50vw;
+    top: 55vh;
+    animation: point 80s linear infinite;
+    transition: var(--point-rotate, rotate(0deg));
+   
+  }
+  .point.reverse {
+    animation-direction: reverse;
+  }
+  .circle {
+    position: absolute;
+    background-color: var(--circle-background, #F8F8F8);
+    width: var(--circle-width, 10vw);
+    height: var(--circle-height, 10vh);
+    transform: translate(-50%, -50%) var(--circle-rotate, 0deg);
+    border-radius: var(--circle-border, 50%);
+    
+    z-index: 1;
+  }
+
+  @keyframes point {
+    0% {
+        transform:  rotate(0deg);
+    }
+    100% {
+        transform:  rotate(360deg);
+    }
+  }

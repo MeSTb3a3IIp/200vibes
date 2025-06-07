@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import "./../css/TaskDetail.css"
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 function TaskDetail() {
@@ -37,8 +38,10 @@ function TaskDetail() {
 
   return (
     <div className="task-detail">
-      <h2>Задача {id}: {taskData.title}</h2>
-      <p>{taskData.description}</p>
+      <h2>{taskData.title}</h2>
+      <div className="desc">
+        <p>{taskData.description}</p>
+      </div>
       <form onSubmit={handleSubmit} className="code-form">
         {/* Оборачиваем редактор и нумерацию в один скроллируемый блок */}
         <div className="editor-scroll-container">
@@ -55,6 +58,7 @@ function TaskDetail() {
               value={code}
               onChange={handleCodeChange}
               placeholder="Напишите ваше решение здесь..."
+              wrap="off"
             ></textarea>
           </div>
         </div>

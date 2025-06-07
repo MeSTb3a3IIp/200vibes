@@ -89,18 +89,18 @@
     margin: 20px;
     padding: 20px;
     width: 25%;
-    border-left: 1px solid #eee;
+    border-left: 1px solid #f8f8f8;
 }
 .help-item {
     
     position: relative;
-    height: 20vh;
+    height: 35vh;
     padding: 15px;
     margin-bottom: 10px;
     width: calc(25vw - 30px);
     letter-spacing: 1px;
     border-radius: 10px;
-    border: 2px solid #eee;
+    border: 2px solid #f8f8f8;
 
     background-image: url('./../images/HelpForCloudCoin.png'); /* Указываем путь к изображению */
     background-size: cover; /* Изображение масштабируется пропорционально, чтобы покрыть весь блок */
@@ -117,7 +117,8 @@
 }
 .help-description {
     position: relative;
-    margin: -10px;
+    top: 10%;
+    margin: -5px;
     padding: 20px;
     color: #fff;
     font-size: 1.1em;
@@ -127,13 +128,14 @@
     text-decoration: none;
 }
 .help-button {
+    top: 22%;
     position: relative;
     display: block;
-    background-color: #eeeeee;
+    background-color: #f8f8f8;
     border: none;
     height: 3vh;
     width: 8vw;
-    margin: 0 auto;
+    margin: -10px auto;
     color: #555;
     border-radius: 15px;
     letter-spacing: 1px;
@@ -143,6 +145,6 @@
 
 .help-button:hover {
     background-color: #A8D0E6;
-    border: 2px solid #eee;
+    border: 2px solid #f8f8f8;
     color: #fff;
 }
