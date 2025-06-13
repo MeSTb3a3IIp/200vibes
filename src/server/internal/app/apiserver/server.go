@@ -1,3 +1,4 @@
+// server.go
 package apiserver
 
 import (
@@ -17,6 +18,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// контекстные ключи
 type ctxKey int8
 
 const (
@@ -30,6 +32,7 @@ var (
 	errNotAuthenticated         = errors.New("not authenticated")
 )
 
+// Server описывает HTTP-сервер
 type Server struct {
 	logger       *logrus.Logger
 	router       *mux.Router
@@ -37,40 +40,33 @@ type Server struct {
 	sessionStore sessions.Store
 }
 
-type SubmitRequest struct {
-	Solution string `json:"solution"`
-	Mode     string `json:"mode"` // "sequential" или "parallel"
-}
-
-func NewServer(store store.Store, sessionStore sessions.Store) *Server {
+// NewServer создаёт новый экземпляр Server
+func NewServer(st store.Store, ss sessions.Store) *Server {
 	server := &Server{
 		logger:       logrus.New(),
 		router:       mux.NewRouter(),
-		store:        store,
-		sessionStore: sessionStore,
+		store:        st,
+		sessionStore: ss,
 	}
 	server.ConfigureRouter()
 	return server
 }
-func (server *Server) ConfigureRouter() {
-	//server.router.Use(server.setRequestID)
-	//server.router.Use(server.logRequest)
-	//server.router.Use(handlers.CORS(handlers.AllowedOrigins([]string{"*"})))
 
+// ConfigureRouter настраивает маршруты
+func (server *Server) ConfigureRouter() {
 	server.router.HandleFunc("/users", server.handleUsersCreate()).Methods("POST")
 	server.router.HandleFunc("/sessions", server.handleSessionsCreate()).Methods("POST")
 	server.router.HandleFunc("/api/check-solution", server.handleCheckSolution()).Methods("POST")
-	server.router.HandleFunc("/api/tasks", server.handleTasks()).Methods("GET") //получение списка задач из бд
-
-	//private := server.router.PathPrefix("/private").Subrouter()
-	//private.Use(server.authenticateUser)
-	//private.HandleFunc("/whoami", server.handleWhoami()).Methods("GET")
-
+	server.router.HandleFunc("/api/tasks", server.handleTasks()).Methods("GET")
+	// private-маршруты можно подключить здесь через server.authenticateUser
 }
 
+// ServeHTTP реализует http.Handler
 func (server *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	server.router.ServeHTTP(w, r)
 }
+
+// helper: отправка ошибки в формате JSON
 func (server *Server) error(w http.ResponseWriter, r *http.Request, status int, err error) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
@@ -79,6 +75,7 @@ func (server *Server) error(w http.ResponseWriter, r *http.Request, status int, 
 	})
 }
 
+// helper: отправка успешного ответа
 func (server *Server) respond(w http.ResponseWriter, r *http.Request, code int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
@@ -87,12 +84,7 @@ func (server *Server) respond(w http.ResponseWriter, r *http.Request, code int, 
 	}
 }
 
-func (s *Server) handleWhoami() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		s.respond(w, r, http.StatusOK, r.Context().Value(ctxKeyUser).(*model.User))
-	}
-}
-
+// Создание пользователя
 func (server *Server) handleUsersCreate() http.HandlerFunc {
 	type request struct {
 		Fullname string `json:"fullname"`
@@ -119,6 +111,7 @@ func (server *Server) handleUsersCreate() http.HandlerFunc {
 	}
 }
 
+// Создание сессии (логин)
 func (server *Server) handleSessionsCreate() http.HandlerFunc {
 	type request struct {
 		Email    string `json:"email"`
@@ -145,83 +138,95 @@ func (server *Server) handleSessionsCreate() http.HandlerFunc {
 			server.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
-
 		server.respond(w, r, http.StatusOK, nil)
 	}
 }
-func (s *Server) setRequestID(next http.Handler) http.Handler {
+
+// Пример middleware для WhoAmI
+func (server *Server) handleWhoami() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(ctxKeyUser).(*model.User)
+		server.respond(w, r, http.StatusOK, user)
+	}
+}
+
+// Middleware: присвоить request ID
+func (server *Server) setRequestID(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := uuid.New().String()
 		w.Header().Set("X-Request-ID", id)
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKeyRequestID, id)))
 	})
 }
-func (s *Server) logRequest(next http.Handler) http.Handler {
+
+// Middleware: логирование запросов
+func (server *Server) logRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		logger := s.logger.WithFields(logrus.Fields{
+		logger := server.logger.WithFields(logrus.Fields{
 			"remote_addr": r.RemoteAddr,
 			"request_id":  r.Context().Value(ctxKeyRequestID),
 		})
 		logger.Infof("started %s %s", r.Method, r.RequestURI)
-
 		start := time.Now()
 		rw := &responseWriter{w, http.StatusOK}
 		next.ServeHTTP(rw, r)
-
 		logger.Infof(
 			"completed with %d %s in %v",
 			rw.code,
 			http.StatusText(rw.code),
-			time.Now().Sub(start))
+			time.Since(start),
+		)
 	})
 }
 
-func (s *Server) authenticateUser(next http.Handler) http.Handler {
+// Middleware: аутентификация
+func (server *Server) authenticateUser(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session, err := s.sessionStore.Get(r, sessionName)
+		session, err := server.sessionStore.Get(r, sessionName)
 		if err != nil {
-			s.error(w, r, http.StatusInternalServerError, err)
+			server.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
 		id, ok := session.Values["user_id"]
 		if !ok {
-			s.error(w, r, http.StatusUnauthorized, errNotAuthenticated)
+			server.error(w, r, http.StatusUnauthorized, errNotAuthenticated)
 			return
 		}
-		u, err := s.store.User().Find(id.(int))
+		user, err := server.store.User().Find(id.(int))
 		if err != nil {
-			s.error(w, r, http.StatusUnauthorized, errNotAuthenticated)
+			server.error(w, r, http.StatusUnauthorized, errNotAuthenticated)
 			return
 		}
-		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKeyUser, u)))
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKeyUser, user)))
 	})
 }
 
-func (s *Server) handleCheckSolution() http.HandlerFunc {
+// Проверка решения — теперь останавливаемся на первом неуспешном тесте
+func (server *Server) handleCheckSolution() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// 1) Парсим тело
+		// 1) Парсим тело запроса
 		var req struct {
 			TaskID   int    `json:"taskId"`
 			Solution string `json:"solution"`
 			Mode     string `json:"mode"` // "sequential" или "parallel"
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			s.error(w, r, http.StatusBadRequest, err)
+			server.error(w, r, http.StatusBadRequest, err)
 			return
 		}
 		if strings.TrimSpace(req.Solution) == "" {
-			s.error(w, r, http.StatusBadRequest, errors.New("пустое решение недопустимо"))
+			server.error(w, r, http.StatusBadRequest, errors.New("пустое решение недопустимо"))
 			return
 		}
 
 		// 2) Загружаем тесты
-		tests, err := s.store.DataTest().FindByTaskID(req.TaskID)
+		tests, err := server.store.DataTest().FindByTaskID(req.TaskID)
 		if err != nil {
-			s.error(w, r, http.StatusInternalServerError, err)
+			server.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
 		if len(tests) == 0 {
-			s.error(w, r, http.StatusNotFound, errors.New("тестовые данные не найдены"))
+			server.error(w, r, http.StatusNotFound, errors.New("тестовые данные не найдены"))
 			return
 		}
 
@@ -231,25 +236,33 @@ func (s *Server) handleCheckSolution() http.HandlerFunc {
 		// 4) Компиляция + запуск всех тестов
 		results, err := EvaluateSolution(req.Solution, tests, req.Mode == "parallel")
 		if err != nil {
-			s.error(w, r, http.StatusInternalServerError, err)
+			server.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
 
-		// 5) Подсчитываем сколько тестов прошло
+		// 5) Срезаем результаты после первого неудачного теста
+		for i, res := range results {
+			if !res.Passed {
+				results = results[:i+1]
+				break
+			}
+		}
+
+		// 6) Считаем пройденные тесты
 		passed := 0
-		for _, r := range results {
-			if r.Passed {
+		for _, res := range results {
+			if res.Passed {
 				passed++
 			}
 		}
 
-		// 6) Формируем ответ с Duration
+		// 7) Формируем ответ
 		resp := struct {
 			Success     bool         `json:"success"`
 			TotalTests  int          `json:"totalTests"`
 			PassedTests int          `json:"passedTests"`
 			Results     []TestResult `json:"results"`
-			Duration    string       `json:"duration"` // строка вида "123.456ms"
+			Duration    string       `json:"duration"`
 		}{
 			Success:     passed == len(results),
 			TotalTests:  len(results),
@@ -258,20 +271,20 @@ func (s *Server) handleCheckSolution() http.HandlerFunc {
 			Duration:    time.Since(start).String(),
 		}
 
-		s.respond(w, r, http.StatusOK, resp)
+		server.respond(w, r, http.StatusOK, resp)
 	}
 }
 
-func (s *Server) handleTasks() http.HandlerFunc {
+// Получение списка задач
+func (server *Server) handleTasks() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Обработка запроса: /api/tasks")
-		tasks, err := s.store.Task().FindAll()
+		tasks, err := server.store.Task().FindAll()
 		if err != nil {
 			fmt.Printf("Ошибка получения задач: %v\n", err)
-			s.error(w, r, http.StatusInternalServerError, err)
+			server.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
-		fmt.Printf("Найдено задач: %d\n", len(tasks))
-		s.respond(w, r, http.StatusOK, tasks)
+		server.respond(w, r, http.StatusOK, tasks)
 	}
 }

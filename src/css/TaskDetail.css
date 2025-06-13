@@ -1,7 +1,8 @@
-/*TASK DETAIL*/
+/* TaskDetail.css */
+
+/* Основная обёртка страницы задачи */
 .task-detail {
-    height: auto;
-    min-height: 100%;
+  min-height: 100%;
   padding: 10px 40px;
   background-color: #f8f8f8;
 }
@@ -18,59 +19,69 @@
   margin-bottom: 20px;
 }
 
+/* Блок описания задачи */
+.desc {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 25px;
+  margin-bottom: 20px;
+}
+
+/* Контейнер с редактором кода и кнопками */
 .code-form {
   margin-top: 20px;
 }
 
-
-
+/* Скрыть native-скроллбар в редакторе */
 *, *::before, *::after {
   box-sizing: border-box;
 }
-/* Обертка для скроллинга всего редактора вместе с номерами строк */
+
+/* Скроллинг редактора вместе с номерами строк */
 .editor-scroll-container {
-    
-  width: 640px;        /* Общая ширина: 40px для номеров + 600px для редактора */
-  height: 300px;       /* Фиксированная высота редактора */
+  width: 640px;       /* 40px для номеров + 600px для textarea */
+  height: 300px;      /* фиксированная высота */
   display: grid;
   grid-template-columns: auto 1fr;
   overflow-y: auto;
-  scrollbar-width: none; 
   overflow-x: hidden;
+  scrollbar-width: none;
   border: 1px solid #ccc;
 }
 
-/* Контейнер для лайн намберс и редактора, без собственного overflow */
+.editor-scroll-container::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Внутренний флекс-контейнер */
 .editor-container {
   display: flex;
   height: 100%;
 }
 
-/* Блок для нумерации строк */
+/* Номера строк */
 .line-numbers {
   width: 40px;
   background-color: #f0f0f0;
   color: #888;
-  padding: 5px;
+  padding: 5px 0;
   text-align: right;
   font-family: monospace;
   font-size: 14px;
-  /* Используем фиксированный line-height для точного вычисления высоты */
   line-height: 18px;
-  overflow-y: hidden;
+  overflow: hidden;
 }
 
-/* Если требуется для некоторых браузеров скрыть нативный скроллбар */
 .line-numbers::-webkit-scrollbar {
   display: none;
 }
 
-/* Отдельная строка нумерации */
 .line-number {
-  height: 18px; /* Фиксированная высота, совпадающая с line-height */
+  height: 18px;
 }
 
-/* Поле редактора кода */
+/* Текстовое поле редактора */
 .code-editor {
   width: 600px;
   flex: 1;
@@ -79,16 +90,15 @@
   padding: 5px;
   font-family: monospace;
   font-size: 14px;
-  line-height: 18px; /* Тоже фиксированное значение */
+  line-height: 18px;
   resize: none;
-  overflow-y: hidden;
-  overflow-x: hidden;
-  /* overflow не указан, т.к. прокрутка на уровне общего контейнера */
+  overflow: hidden;
 }
 
-/* Стилизация кнопки Submit */
+/* Кнопки отправки */
 .submit-button {
   margin-top: 10px;
+  margin-right: 10px;
   padding: 10px 20px;
   font-size: 1em;
   color: #fff;
@@ -98,13 +108,80 @@
   cursor: pointer;
   transition: background-color 0.3s;
 }
-.desc {
-    background-color: #fff;
-    width: 100%;
-    height: auto;
-    padding: 20px;
-    border-radius: 25px;
-}
+
 .submit-button:hover {
   background-color: #0056b3;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Блок статуса и таймера */
+.status-block {
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 16px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-family: sans-serif;
+}
+
+.status-block p {
+  margin: 4px 0;
+}
+
+.timer-text {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Ошибки запроса */
+.error {
+  color: #c00;
+  margin-top: 12px;
+}
+
+/* Первый неудачный тест */
+.failure-block {
+  background: #fff;
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin: 16px 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-family: sans-serif;
+}
+
+.failure-block p {
+  margin: 4px 0;
+  color: #c00;
+  font-weight: bold;
+}
+
+/* Контейнер для результатов с прокруткой */
+.test-results-container {
+  max-height: 60vh;       /* до 60% высоты окна */
+  overflow-y: auto;       /* вертикальный скролл */
+  padding: 12px;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin: 16px 0;
+}
+
+/* «Залипшие» заголовки таблиц внутри результатов */
+.test-results-container table th {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  z-index: 1;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Моноширинный лог-блок с переносом строк */
+.log-block {
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
 }

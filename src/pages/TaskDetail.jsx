@@ -1,5 +1,5 @@
 // TaskDetail.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import "./../css/TaskDetail.css";
 
@@ -7,67 +7,82 @@ function TaskDetail() {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  
-  // Если данные задачи передаются через state
+
+  // Данные задачи
   const taskData = location.state || {
     title: 'Неизвестная задача',
     description: 'Описание отсутствует.'
   };
 
-  const [code, setCode] = useState('');
+  // Основные состояния
+  const [code, setCode]             = useState('');
   const [lineNumbers, setLineNumbers] = useState(['1']);
   const [testResult, setTestResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loading, setLoading]       = useState(false);
+  const [error, setError]           = useState(null);
 
-  // Функция обновления нумерации строк
+  // Для таймера и режима
+  const [currentMode, setCurrentMode] = useState(null);  // "sequential" или "parallel"
+  const [startTime, setStartTime]     = useState(null);
+  const [elapsed, setElapsed]         = useState(0);
+
+  // Обновляем номера строк
   const updateLineNumbers = (text) => {
-    const linesCount = text.split('\n').length;
-    const numbers = [];
-    for (let i = 1; i <= linesCount; i++) {
-      numbers.push(i.toString());
-    }
-    setLineNumbers(numbers);
+    const count = text.split('\n').length;
+    setLineNumbers(Array.from({ length: count }, (_, i) => String(i + 1)));
   };
 
   const handleCodeChange = (e) => {
-    const newText = e.target.value;
-    setCode(newText);
-    updateLineNumbers(newText);
+    const txt = e.target.value;
+    setCode(txt);
+    updateLineNumbers(txt);
   };
 
-  // Функция отправки решения на сервер с указанием режима проверки
+  // Таймер проверки
+  useEffect(() => {
+    let timer;
+    if (loading && startTime) {
+      timer = setInterval(() => {
+        setElapsed(Date.now() - startTime);
+      }, 100);
+    }
+    return () => clearInterval(timer);
+  }, [loading, startTime]);
+
+  // Отправка решения
   const handleSubmit = async (mode) => {
     setError(null);
+    setTestResult(null);
+    setCurrentMode(mode);
+    setStartTime(Date.now());
+    setElapsed(0);
     setLoading(true);
 
     try {
-      const response = await fetch("/api/check-solution", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const res = await fetch('/api/check-solution', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           taskId: parseInt(id, 10),
           solution: code,
-          mode: mode // передаём режим: "sequential" или "parallel"
+          mode
         })
       });
-      const data = await response.json();
-      console.log("Ответ сервера:", data);
-      if (!response.ok) {
-        throw new Error("Ошибка при проверке решения");
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Ошибка при проверке решения');
       setTestResult(data);
     } catch (err) {
-      console.error(err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // Обработчик перехода к странице статистики и комментариев, если тесты прошли
+  // Переход к статистике
   const handleViewStatistics = () => {
-    navigate(`/tasks/${id}/statistics`, { state: { ...taskData, solution: code, result: testResult } });
+    navigate(`/tasks/${id}/statistics`, {
+      state: { ...taskData, solution: code, result: testResult }
+    });
   };
 
   return (
@@ -76,12 +91,13 @@ function TaskDetail() {
       <div className="desc">
         <p>{taskData.description}</p>
       </div>
+
       <div className="code-form">
         <div className="editor-scroll-container">
           <div className="editor-container">
             <div className="line-numbers">
-              {lineNumbers.map(number => (
-                <div key={number} className="line-number">{number}</div>
+              {lineNumbers.map(n => (
+                <div key={n} className="line-number">{n}</div>
               ))}
             </div>
             <textarea
@@ -90,59 +106,75 @@ function TaskDetail() {
               onChange={handleCodeChange}
               placeholder="Напишите ваше решение здесь..."
               wrap="off"
-            ></textarea>
+            />
           </div>
         </div>
-        {/* Две кнопки: последовательная и параллельная проверка */}
-        <button 
-          className="submit-button" 
-          onClick={() => handleSubmit("sequential")}
+
+        <button
+          className="submit-button"
+          onClick={() => handleSubmit('sequential')}
           disabled={loading}
         >
-          Проверка (Последовательно)
+          Проверка (последовательно)
         </button>
-        <button 
-          className="submit-button" 
-          onClick={() => handleSubmit("parallel")}
+        <button
+          className="submit-button"
+          onClick={() => handleSubmit('parallel')}
           disabled={loading}
         >
-          Проверка (Параллельно)
+          Проверка (параллельно)
         </button>
       </div>
 
-      {loading && <p>Проверка решения…</p>}
+      {/* Блок статуса/таймера */}
+      {(loading || testResult) && (
+        <div className="status-block">
+          {loading ? (
+            <p className="timer-text">
+              Идет проверка (
+              {currentMode === 'parallel' ? 'параллельно' : 'последовательно'}
+              ), время: {(elapsed / 1000).toFixed(2)} сек
+            </p>
+          ) : (
+            <p className="timer-text">
+              Режим: {currentMode === 'parallel' ? 'Параллельный' : 'Последовательный'},
+              итоговое время: {testResult.duration}
+            </p>
+          )}
+        </div>
+      )}
+
       {error && <p className="error">Ошибка: {error}</p>}
-      
+
+      {/* Контейнер результатов с прокруткой */}
       {testResult && (
-        <div className="test-results">
+        <div className="test-results-container">
           {testResult.success ? (
-            <div>
+            <>
               <p>Все тесты пройдены!</p>
-              <p>Время проверки: {testResult.duration}</p>
               <button className="stats-button" onClick={handleViewStatistics}>
                 Посмотреть статистику и комментарии
               </button>
-            </div>
+            </>
           ) : (
-            <div>
-              <p>
-                Пройдено {testResult.passedTests} из {testResult.totalTests} тестов.
-              </p>
-              <ul>
-                {testResult.results &&
-                  testResult.results
-                    .filter(r => !r.passed)
-                    .map(r => (
-                      <li key={r.testNumber}>
-                        Тест {r.testNumber} — Input: {r.input}, Expected: {r.expected}, Got: {r.output}
-                        {r.error && ` (Error: ${r.error})`}
-                      </li>
-                    ))
-                }
-              </ul>
-              <p>Время проверки: {testResult.duration}</p>
-              <p>Проверьте код и попробуйте снова.</p>
-            </div>
+            <>
+              {/* Первый неудачный тест */}
+              {(() => {
+                const fail = testResult.results.find(r => !r.passed);
+                if (!fail) return null;
+                return (
+                  <div className="failure-block">
+                    <p>Первый неудачный тест #{fail.testNumber}</p>
+                    <div className="log-block">
+                      Input: {fail.input}
+                      {'\n'}Expected: {fail.expected}
+                      {'\n'}Got: {fail.output}
+                      {fail.error && `\nОшибка: ${fail.error}`}
+                    </div>
+                  </div>
+                );
+              })()}
+            </>
           )}
         </div>
       )}

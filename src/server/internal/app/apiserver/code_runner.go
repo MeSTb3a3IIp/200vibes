@@ -1,3 +1,4 @@
+// code_runner.go
 package apiserver
 
 import (
@@ -60,9 +61,9 @@ func runBinary(runnerPath, input string) (string, error) {
 	return string(out), err
 }
 
-// runSequential выполняет тесты один за другим.
+// runSequential выполняет тесты один за другим, останавливаясь на первом провале.
 func runSequential(runnerPath string, tests []*model.DataTest) ([]TestResult, error) {
-	results := make([]TestResult, len(tests))
+	results := make([]TestResult, 0, len(tests))
 	for i, test := range tests {
 		out, err := runBinary(runnerPath, test.Input)
 		tr := TestResult{
@@ -77,7 +78,12 @@ func runSequential(runnerPath string, tests []*model.DataTest) ([]TestResult, er
 		} else if out != test.Output {
 			tr.Error = "output does not match expected"
 		}
-		results[i] = tr
+		results = append(results, tr)
+
+		// Прерываем на первом неудачном тесте
+		if !tr.Passed {
+			break
+		}
 	}
 	return results, nil
 }
