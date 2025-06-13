@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -197,8 +196,10 @@ func (s *Server) authenticateUser(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), ctxKeyUser, u)))
 	})
 }
+
 func (s *Server) handleCheckSolution() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// 1) Парсим тело
 		var req struct {
 			TaskID   int    `json:"taskId"`
 			Solution string `json:"solution"`
@@ -208,110 +209,56 @@ func (s *Server) handleCheckSolution() http.HandlerFunc {
 			s.error(w, r, http.StatusBadRequest, err)
 			return
 		}
-
-		// Логирование запроса.
-		fmt.Printf("Получен запрос на проверку решения для задачи %d, длина решения: %d, режим: %s\n", req.TaskID, len(req.Solution), req.Mode)
-
-		// Проверяем, что решение не пустое.
 		if strings.TrimSpace(req.Solution) == "" {
 			s.error(w, r, http.StatusBadRequest, errors.New("пустое решение недопустимо"))
 			return
 		}
 
-		// Извлекаем тестовые данные для данной задачи.
+		// 2) Загружаем тесты
 		tests, err := s.store.DataTest().FindByTaskID(req.TaskID)
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
 		if len(tests) == 0 {
-			s.error(w, r, http.StatusNotFound, errors.New("тестовые данные для задачи не найдены"))
+			s.error(w, r, http.StatusNotFound, errors.New("тестовые данные не найдены"))
 			return
 		}
 
-		// Засекаем время проверки.
-		startTime := time.Now()
+		// 3) Засекаем время
+		start := time.Now()
 
-		var results []TestResult
-		if req.Mode == "parallel" {
-			// Для параллельного режима используем уже существующую функцию.
-			results, err = runUserSolution(req.Solution, tests)
-		} else {
-			// Последовательный режим: выполняем проверку тестов в цикле без параллельных горутин.
-			results, err = func(solution string, tests []*model.DataTest) ([]TestResult, error) {
-				out := make([]TestResult, len(tests))
-				// Сохраняем код во временный файл с помощью уже реализованной функции saveCodeToFile.
-				fileName, err := saveCodeToFile(solution)
-				if err != nil {
-					return nil, err
-				}
-				// Удаляем временный файл после выполнения
-				defer os.Remove(fileName)
-
-				for i, test := range tests {
-					output, err := runUserCode(fileName, test.Input)
-					res := TestResult{
-						TestNumber: i + 1,
-						Input:      test.Input,
-						Expected:   test.Output,
-						Output:     output,
-						Passed:     false,
-					}
-					if err != nil {
-						res.Error = err.Error()
-					} else if output == test.Output {
-						res.Passed = true
-					} else {
-						res.Error = "Output does not match expected result"
-					}
-					out[i] = res
-				}
-				return out, nil
-			}(req.Solution, tests)
-		}
+		// 4) Компиляция + запуск всех тестов
+		results, err := EvaluateSolution(req.Solution, tests, req.Mode == "parallel")
 		if err != nil {
 			s.error(w, r, http.StatusInternalServerError, err)
 			return
 		}
 
-		// Подсчитываем количество пройденных тестов.
-		passedCount := 0
-		for _, res := range results {
-			if res.Passed {
-				passedCount++
-			}
-		}
-		allPassed := (passedCount == len(results))
-
-		// Замер времени выполнения.
-		duration := time.Since(startTime)
-
-		// Сохраняем (или обновляем) решение пользователя.
-		user, ok := r.Context().Value(ctxKeyUser).(*model.User)
-		if !ok {
-			s.logger.Warn("User not found in request context; решение не сохранено.")
-		} else {
-			if err := s.store.Solution().UpsertSolution(req.Solution, user.Id, req.TaskID, true); err != nil {
-				s.logger.Error("Не удалось сохранить решение: ", err)
+		// 5) Подсчитываем сколько тестов прошло
+		passed := 0
+		for _, r := range results {
+			if r.Passed {
+				passed++
 			}
 		}
 
-		// Формируем ответ.
-		response := struct {
+		// 6) Формируем ответ с Duration
+		resp := struct {
 			Success     bool         `json:"success"`
 			TotalTests  int          `json:"totalTests"`
 			PassedTests int          `json:"passedTests"`
 			Results     []TestResult `json:"results"`
-			Duration    string       `json:"duration"`
+			Duration    string       `json:"duration"` // строка вида "123.456ms"
 		}{
-			Success:     allPassed,
+			Success:     passed == len(results),
 			TotalTests:  len(results),
-			PassedTests: passedCount,
+			PassedTests: passed,
 			Results:     results,
-			Duration:    duration.String(),
+			Duration:    time.Since(start).String(),
 		}
 
-		s.respond(w, r, http.StatusOK, response)
+		s.respond(w, r, http.StatusOK, resp)
 	}
 }
 

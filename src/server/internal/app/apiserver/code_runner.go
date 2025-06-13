@@ -6,12 +6,13 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"runtime"
 	"sync"
 
 	"github.com/MeSTb3a3IIp/200vibes/src/server/internal/app/model"
 )
 
-// TestResult описывает результат проверки одного теста.
+// TestResult описывает результат одного теста.
 type TestResult struct {
 	TestNumber int    `json:"testNumber"`
 	Input      string `json:"input"`
@@ -21,69 +22,110 @@ type TestResult struct {
 	Error      string `json:"error,omitempty"`
 }
 
-// saveCodeToFile сохраняет код пользователя во временный файл.
-func saveCodeToFile(code string) (string, error) {
-	tmpFile, err := ioutil.TempFile("", "solution-*.go")
+// buildSolution сохраняет код во временный файл и компилирует бинарник.
+func buildSolution(code string) (runnerPath string, cleanup func(), err error) {
+	// 1) Сохраняем исходник
+	src, err := ioutil.TempFile("", "solution-*.go")
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	if _, err := tmpFile.Write([]byte(code)); err != nil {
-		tmpFile.Close()
-		return "", err
+	srcName := src.Name()
+	if _, err := src.WriteString(code); err != nil {
+		src.Close()
+		return "", nil, err
 	}
-	tmpFile.Close()
-	return tmpFile.Name(), nil
+	src.Close()
+
+	// 2) Компилируем
+	runnerPath = srcName + ".bin"
+	cmd := exec.Command("go", "build", "-o", runnerPath, srcName)
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return "", nil, fmt.Errorf("build failed: %v\n%s", err, out)
+	}
+
+	// 3) Функция очистки
+	cleanup = func() {
+		os.Remove(srcName)
+		os.Remove(runnerPath)
+	}
+	return runnerPath, cleanup, nil
 }
 
-// runUserCode запускает сохранённый код через "go run", подставляя тестовые входные данные.
-func runUserCode(fileName string, input string) (string, error) {
-	cmd := exec.Command("go", "run", fileName)
+// runBinary запускает готовый бинарник с подставленным stdin.
+func runBinary(runnerPath, input string) (string, error) {
+	cmd := exec.Command(runnerPath)
 	cmd.Stdin = bytes.NewBufferString(input)
-	var out bytes.Buffer
-	var stderr bytes.Buffer
-	cmd.Stdout = &out
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	if err != nil {
-		return "", fmt.Errorf("%v: %s", err, stderr.String())
-	}
-	return out.String(), nil
+
+	out, err := cmd.CombinedOutput()
+	return string(out), err
 }
 
-// runUserSolution запускает код пользователя для всех тестовых случаев параллельно.
-func runUserSolution(solutionCode string, tests []*model.DataTest) ([]TestResult, error) {
+// runSequential выполняет тесты один за другим.
+func runSequential(runnerPath string, tests []*model.DataTest) ([]TestResult, error) {
 	results := make([]TestResult, len(tests))
-
-	fileName, err := saveCodeToFile(solutionCode)
-	if err != nil {
-		return nil, err
+	for i, test := range tests {
+		out, err := runBinary(runnerPath, test.Input)
+		tr := TestResult{
+			TestNumber: i + 1,
+			Input:      test.Input,
+			Expected:   test.Output,
+			Output:     out,
+			Passed:     err == nil && out == test.Output,
+		}
+		if err != nil {
+			tr.Error = err.Error()
+		} else if out != test.Output {
+			tr.Error = "output does not match expected"
+		}
+		results[i] = tr
 	}
-	defer os.Remove(fileName)
+	return results, nil
+}
 
+// runParallel выполняет все тесты параллельно, но не более NumCPU() процессов.
+func runParallel(runnerPath string, tests []*model.DataTest) ([]TestResult, error) {
 	var wg sync.WaitGroup
-	wg.Add(len(tests))
+	results := make([]TestResult, len(tests))
+	sem := make(chan struct{}, runtime.NumCPU())
 
 	for i, test := range tests {
+		wg.Add(1)
 		go func(i int, test *model.DataTest) {
 			defer wg.Done()
-			output, err := runUserCode(fileName, test.Input)
-			res := TestResult{
+			sem <- struct{}{}        // занять слот
+			defer func() { <-sem }() // освободить слот
+
+			out, err := runBinary(runnerPath, test.Input)
+			tr := TestResult{
 				TestNumber: i + 1,
 				Input:      test.Input,
 				Expected:   test.Output,
-				Output:     output,
-				Passed:     false,
+				Output:     out,
+				Passed:     err == nil && out == test.Output,
 			}
 			if err != nil {
-				res.Error = err.Error()
-			} else if output == test.Output {
-				res.Passed = true
-			} else {
-				res.Error = "Output does not match expected result"
+				tr.Error = err.Error()
+			} else if out != test.Output {
+				tr.Error = "output does not match expected"
 			}
-			results[i] = res
+			results[i] = tr
 		}(i, test)
 	}
+
 	wg.Wait()
 	return results, nil
+}
+
+// EvaluateSolution компилирует код один раз и запускает нужный режим.
+func EvaluateSolution(code string, tests []*model.DataTest, parallel bool) ([]TestResult, error) {
+	runnerBin, cleanup, err := buildSolution(code)
+	if err != nil {
+		return nil, err
+	}
+	defer cleanup()
+
+	if parallel {
+		return runParallel(runnerBin, tests)
+	}
+	return runSequential(runnerBin, tests)
 }
